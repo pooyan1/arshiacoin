@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Puyan Coin</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Vazirmatn, Arial, sans-serif;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: radial-gradient(circle at top, #1b1b2a 0%, #0d0d14 60%, #08080c 100%);
+      color: #fff;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .app {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 82px;
+    }
+
+    .page {
+      display: none;
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .top-card {
+      background: linear-gradient(135deg, rgba(255,215,0,0.12), rgba(255,255,255,0.04));
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px;
+      padding: 18px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    }
+
+    .score-label {
+      color: #b8b8c8;
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+    }
+
+    .score {
+      font-size: 3rem;
+      font-weight: 800;
+      color: #ffd84d;
+      text-shadow: 0 0 18px rgba(255, 216, 77, 0.35);
+    }
+
+    .tap-area {
+      min-height: calc(100vh - 260px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 0;
+    }
+
+    .tap-button {
+      width: 420px;
+      height: 420px;
+      border: 0;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #ffe77a 0%, #ffd000 35%, #ffb300 100%);
+      box-shadow:
+        0 18px 40px rgba(255, 193, 7, 0.25),
+        inset 0 0 0 8px rgba(255,255,255,0.12),
+        inset 0 -10px 20px rgba(0,0,0,0.15);
+      position: relative;
+      cursor: pointer;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.08s ease;
+    }
+
+    .tap-button:active {
+      transform: scale(0.94);
+    }
+
+    .tap-photo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    .tap-glow {
+      position: absolute;
+      inset: 10px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.18);
+      pointer-events: none;
+    }
+
+    .hint {
+      margin-top: 16px;
+      color: #a6a6b8;
+      text-align: center;
+      font-size: 0.95rem;
+    }
+
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #fff;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .muted {
+      color: #9d9db0;
+      font-size: 0.92rem;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-weight: 700;
+      cursor: pointer;
+      background: linear-gradient(135deg, #ffd84d, #ffb300);
+      color: #111;
+    }
+
+    .navbar {
+      height: 82px;
+      background: rgba(16,16,24,0.9);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+    }
+
+    .nav-item {
+      flex: 1;
+      text-align: center;
+      color: #8e8ea3;
+      cursor: pointer;
+      font-size: 0.78rem;
+      padding: 10px 0;
+    }
+
+    .nav-item.active {
+      color: #ffd84d;
+    }
+
+    .nav-icon {
+      display: block;
+      font-size: 1.35rem;
+      margin-bottom: 6px;
+    }
+
+    .floating-text {
+      position: absolute;
+      color: #ffd84d;
+      font-weight: 800;
+      font-size: 1rem;
+      animation: floatUp 0.7s ease forwards;
+      pointer-events: none;
+      text-shadow: 0 4px 12px rgba(0,0,0,0.35);
+    }
+
+    @keyframes floatUp {
+      from {
+        opacity: 0;
+        transform: translateY(0) scale(0.9);
+      }
+      20% {
+        opacity: 1;
+      }
+      to {
+        opacity: 0;
+        transform: translateY(-48px) scale(1.2);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div id="home" class="page active">
+      <div class="top-card">
+        <div class="score-label">امتیاز شما</div>
+        <div class="score" id="score">0</div>
+      </div>
+
+      <div class="tap-area" id="tapArea">
+        <button class="tap-button" id="tapBtn" type="button">
+          <img
+            class="tap-photo"
+            src="c:\Users\pooyan\Videos\Captures\Media viewer 7_31_2026 10_14_04 PM.png"
+            alt="Your Photo"
+          />
+          <div class="tap-glow"></div>
+        </button>
+      </div>
+
+      <div class="hint">روی عکس بزن تا امتیاز بگیری و صدا پخش بشه</div>
+    </div>
+
+    <div id="tasks" class="page">
+      <div class="section-title">تسک‌ها</div>
+      <div class="card row">
+        <div>
+          <div>انفالو کردن یوتیوب</div>
+          <div class="muted">+500 امتیاز</div>
+        </div>
+        <button class="btn">انجام شد</button>
+      </div>
+      <div class="card row">
+        <div>
+          <div>انفالو کردن اینستا</div>
+          <div class="muted">+1000 امتیاز</div>
+        </div>
+        <button class="btn">انجام شد</button>
+      </div>
+    </div>
+
+    <div id="friends" class="page">
+      <div class="section-title">دوستان</div>
+      <div class="card">
+        <div>حقیقتا بدبختم پول زور ودا</div>
+        <div class="muted" style="margin-top:8px;">ترخدااااااااا</div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="navbar">
+    <div class="nav-item active" onclick="showPage('home', this)">
+      <span class="nav-icon">🏠</span>
+      <span>هوم</span>
+    </div>
+    <div class="nav-item" onclick="showPage('tasks', this)">
+      <span class="nav-icon">📋</span>
+      <span>تسک</span>
+    </div>
+    <div class="nav-item" onclick="showPage('friends', this)">
+      <span class="nav-icon">👥</span>
+      <span>فریند</span>
+    </div>
+  </nav>
+
+  <audio id="tapnd" src="c:\Users\pooyan\Music\mew-quiplash.mp3" preload="auto"></audio>
+
+  <script>
+    let score = 0;
+    const scoreEl = document.getElementById('score');
+    const tapBtn = document.getElementById('tapBtn');
+    const tapSound = document.getElementById('tapSound');
+    const tapArea = document.getElementById('tapArea');
+
+    tapBtn.addEventListener('click', () => {
+      score += 1;
+      scoreEl.textContent = score.toLocaleString('fa-IR');
+
+      tapSound.currentTime = 0;
+      tapSound.play().catch(() => {});
+
+      const float = document.createElement('div');
+      float.className = 'floating-text';
+      float.textContent = '+1';
+      const rect = tapBtn.getBoundingClientRect();
+      float.style.left = rect.left + rect.width / 2 - 10 + 'px';
+      float.style.top = rect.top + rect.height / 2 - 10 + 'px';
+      document.body.appendChild(float);
+      setTimeout(() => float.remove(), 700);
+    });
+
+    function showPage(id, el) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      el.classList.add('active');
+    }
+  </script>
+</body>
+</html>
