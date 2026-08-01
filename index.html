@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>arshia Coin</title>
+  <title>Puyan Coin Pro</title>
   <style>
     * {
       margin: 0; padding: 0; box-sizing: border-box;
@@ -65,6 +65,10 @@
       font-size: 2rem; z-index: 10; pointer-events: none;
     }
     .spin-btn { margin-top: 30px; width: 100%; padding: 15px; border-radius: 15px; border: none; background: #ffd84d; font-weight: 800; font-size: 1.1rem; cursor: pointer; }
+
+    /* Video Page */
+    .video-box { width: 100%; border-radius: 18px; overflow: hidden; border: 1px solid rgba(255,215,0,0.3); background: #000; }
+    .video-box video { width: 100%; height: auto; display: block; max-height: 60vh; }
 
     /* Navbar */
     .navbar {
@@ -151,41 +155,22 @@
       <button class="btn" style="width: 100%;">کپی کردن لینک</button>
     </div>
   </div>
-</div>
 
-<!-- AIRDROP PAGE -->
-<div id="airdrop" class="page">
-  <div style="
-    position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    background:#000;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-  ">
-    <video
-      src="airdrop.mp4"
-      controls
-      autoplay
-      playsinline
-      style="
-        width:100%;
-        height:100%;
-        object-fit:cover;
-      ">
-    </video>
+  <!-- AIRDROP PAGE -->
+  <div id="airdrop" class="page">
+    <div class="section-title">ایر دراپ 🎁</div>
+    <div class="card">
+      <div style="text-align:center; margin-bottom: 12px; color:#9d9db0; font-size:0.9rem;">برای دریافت جایزه، این ویدیو را تماشا کنید</div>
+      <div class="video-box">
+        <video id="airdropVideo" controls playsinline preload="auto">
+          <source src="./VIDEO.mp4" type="video/mp4">
+          مرورگر شما از پخش ویدیو پشتیبانی نمیکند.
+        </video>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- دکمه ایردراپ -->
-<div class="nav-item" onclick="showPage('airdrop', this)">
-  <span class="nav-icon">🎁</span>
-  <span>ایردراپ</span>
-</div>
-  
 <!-- NAVIGATION -->
 <nav class="navbar">
   <div class="nav-item active" onclick="showPage('home', this)">
@@ -193,6 +178,9 @@
   </div>
   <div class="nav-item" onclick="showPage('tasks', this)">
     <span class="nav-icon">📋</span><span>تسک‌ها</span>
+  </div>
+  <div class="nav-item" onclick="showPage('airdrop', this)">
+    <span class="nav-icon">🎁</span><span>ایر دراپ</span>
   </div>
   <div class="nav-item" onclick="showPage('spin', this)">
     <span class="nav-icon">🎡</span><span>جایزه</span>
@@ -211,6 +199,7 @@
   const tapSound = document.getElementById('tapSound');
   const wheel = document.getElementById('wheel');
   const spinBtn = document.getElementById('spinBtn');
+  const airdropVideo = document.getElementById('airdropVideo');
 
   // --- CORE FUNCTIONS ---
 
@@ -224,6 +213,13 @@
     document.getElementById(id).classList.add('active');
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     el.classList.add('active');
+
+    // Pause video when leaving airdrop, play when entering
+    if (id === 'airdrop') {
+      airdropVideo.play().catch(() => {});
+    } else if (airdropVideo) {
+      airdropVideo.pause();
+    }
   }
 
   // --- TAP MECHANIC ---
