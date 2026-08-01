@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Puyan Coin Pro</title>
+  <style>
+    * {
+      margin: 0; padding: 0; box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      user-select: none; -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: radial-gradient(circle at top, #1b1b2a 0%, #0d0d14 60%, #08080c 100%);
+      color: #fff; height: 100vh; overflow: hidden;
+    }
+
+    .app { height: 100vh; display: flex; flex-direction: column; padding-bottom: 82px; }
+
+    .page { display: none; flex: 1; padding: 20px; overflow-y: auto; animation: fadeIn 0.3s ease; }
+    .page.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Score Card */
+    .top-card {
+      background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,255,255,0.05));
+      border: 1px solid rgba(255,215,0,0.3); border-radius: 24px;
+      padding: 20px; text-align: center; margin-bottom: 20px;
+    }
+    .score-label { color: #b8b8c8; font-size: 0.9rem; margin-bottom: 5px; }
+    .score { font-size: 3.5rem; font-weight: 800; color: #ffd84d; text-shadow: 0 0 20px rgba(255, 216, 77, 0.4); }
+
+    /* Tap Area */
+    .tap-area { min-height: 300px; display: flex; align-items: center; justify-content: center; }
+    .tap-button {
+      width: 220px; height: 220px; border: 0; border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #ffe77a, #ffb300);
+      box-shadow: 0 15px 35px rgba(255, 179, 0, 0.3), inset 0 -8px 15px rgba(0,0,0,0.2);
+      cursor: pointer; position: relative; overflow: hidden; transition: transform 0.1s;
+    }
+    .tap-button:active { transform: scale(0.92); }
+    .tap-photo { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+
+    /* Task & Spin Style */
+    .section-title { font-size: 1.4rem; font-weight: 700; margin: 10px 0 20px; color: #ffd84d; }
+    .card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; padding: 16px; margin-bottom: 12px; }
+    .row { display: flex; align-items: center; justify-content: space-between; }
+    .muted { color: #9d9db0; font-size: 0.85rem; margin-top: 4px; }
+    .btn { border: 0; border-radius: 12px; padding: 10px 18px; font-weight: 700; cursor: pointer; background: #ffd84d; color: #111; }
+
+    /* Spin Wheel */
+    .wheel-container { display: flex; flex-direction: column; align-items: center; margin-top: 30px; }
+    .wheel-wrapper { position: relative; width: 280px; height: 280px; }
+    .wheel {
+      width: 100%; height: 100%; border-radius: 50%; border: 5px solid #ffd84d;
+      background: conic-gradient(
+        #ffb300 0deg 60deg, #ffcc33 60deg 120deg, #ffdb4d 120deg 180deg,
+        #ffb300 180deg 240deg, #ffcc33 240deg 300deg, #ffdb4d 300deg 360deg
+      );
+      transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1);
+    }
+    .wheel-pointer {
+      position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+      font-size: 2rem; z-index: 10; pointer-events: none;
+    }
+    .spin-btn { margin-top: 30px; width: 100%; padding: 15px; border-radius: 15px; border: none; background: #ffd84d; font-weight: 800; font-size: 1.1rem; cursor: pointer; }
+
+    /* Navbar */
+    .navbar {
+      height: 75px; background: rgba(15, 15, 25, 0.95); backdrop-filter: blur(15px);
+      border-top: 1px solid rgba(255,255,255,0.1); display: flex; position: fixed;
+      bottom: 0; left: 0; right: 0; justify-content: space-around; align-items: center;
+    }
+    .nav-item { flex: 1; text-align: center; color: #666; font-size: 0.8rem; cursor: pointer; }
+    .nav-item.active { color: #ffd84d; }
+    .nav-icon { display: block; font-size: 2rem; margin-bottom: 5px; }
+
+    /* Animation for score */
+    .floating-text {
+      position: absolute; color: #ffd84d; font-weight: 800; font-size: 1.5rem;
+      animation: floatUp 0.8s ease-out forwards; pointer-events: none; z-index: 100;
+    }
+    @keyframes floatUp { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-100px); } }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <!-- HOME PAGE -->
+  <div id="home" class="page active">
+    <div class="top-card">
+      <div class="score-label">TOTAL BALANCE</div>
+      <div class="score" id="score">0</div>
+    </div>
+    <div class="tap-area" id="tapArea">
+      <button class="tap-button" id="tapBtn">
+        <img class="tap-photo" src="arshia_logo.png" alt="User">
+      </button>
+    </div>
+    <div style="text-align: center; color: #666; font-size: 0.8rem; margin-top: 20px;">روی عکس ضربه بزن!</div>
+  </div>
+
+  <!-- TASKS PAGE -->
+  <div id="tasks" class="page">
+    <div class="section-title">مأموریت‌ها</div>
+    <div class="card row">
+      <div>
+        <div>انفالو کردن یوتیوب</div>
+        <div class="muted">+1000 arshiacoin</div>
+      </div>
+      <button class="btn" onclick="completeTask(this, 1000)">انجام شد</button>
+    </div>
+    <div class="card row">
+      <div>
+        <div>انفالو کردن اینستا</div>
+        <div class="muted">+1000 arshiacoin</div>
+      </div>
+      <button class="btn" onclick="completeTask(this, 1000)">انجام شد</button>
+    </div>
+    <div class="card row">
+      <div>
+        <div>انفالو کردن کیک</div>
+        <div class="muted">+2500 arshiacoin</div>
+      </div>
+      <button class="btn" onclick="completeTask(this, 2500)">انجام شد</button>
+    </div>
+  </div>
+
+  <!-- SPIN PAGE -->
+  <div id="spin" class="page">
+    <div class="section-title">چرخنده شانس</div>
+    <div class="wheel-container">
+      <div class="wheel-wrapper">
+        <div class="wheel-pointer">⬇️</div>
+        <div class="wheel" id="wheel"></div>
+      </div>
+      <button class="spin-btn" id="spinBtn">چرخاندن چرخنده!</button>
+      <div class="muted" style="margin-top: 15px;">هر روز فقط یک بار شانس خود را امتحان کنید</div>
+    </div>
+  </div>
+
+  <!-- FRIENDS PAGE -->
+  <div id="friends" class="page">
+    <div class="section-title">دعوت از دوستان</div>
+    <div class="card" style="text-align: center;">
+      <div style="font-size: 1.1rem; margin-bottom: 15px;">لینک دعوت اختصاصی شما:</div>
+      <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 10px; color: #ffd84d; font-size: 0.9rem; margin-bottom: 15px;">
+        t.me/arshiacoin?start=#
+      </div>
+      <button class="btn" style="width: 100%;">کپی کردن لینک</button>
+    </div>
+  </div>
+</div>
+
+<!-- NAVIGATION -->
+<nav class="navbar">
+  <div class="nav-item active" onclick="showPage('home', this)">
+    <span class="nav-icon">🏠</span><span>خانه</span>
+  </div>
+  <div class="nav-item" onclick="showPage('tasks', this)">
+    <span class="nav-icon">📋</span><span>تسک‌ها</span>
+  </div>
+  <div class="nav-item" onclick="showPage('spin', this)">
+    <span class="nav-icon">🎡</span><span>جایزه</span>
+  </div>
+  <div class="nav-item" onclick="showPage('friends', this)">
+    <span class="nav-icon">👥</span><span>دوستان</span>
+  </div>
+</nav>
+
+<audio id="tapSound" src="./tap-sound.mp3" preload="auto"></audio>
+
+<script>
+  let score = 0;
+  const scoreEl = document.getElementById('score');
+  const tapBtn = document.getElementById('tapBtn');
+  const tapSound = document.getElementById('tapSound');
+  const wheel = document.getElementById('wheel');
+  const spinBtn = document.getElementById('spinBtn');
+
+  // --- CORE FUNCTIONS ---
+
+  function updateScore(amount) {
+    score += amount;
+    scoreEl.textContent = score.toLocaleString('en-US');
+  }
+
+  function showPage(id, el) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  // --- TAP MECHANIC ---
+  tapBtn.addEventListener('click', (e) => {
+    updateScore(1);
+    tapSound.currentTime = 0;
+    tapSound.play().catch(() => {});
+
+    // Floating text animation
+    const float = document.createElement('div');
+    float.className = 'floating-text';
+    float.textContent = '+1';
+    float.style.left = `${e.clientX}px`;
+    float.style.top = `${e.clientY}px`;
+    document.body.appendChild(float);
+    setTimeout(() => float.remove(), 800);
+  });
+
+  // --- TASK MECHANIC ---
+  function completeTask(btn, reward) {
+    btn.textContent = '✓';
+    btn.style.background = '#4CAF50';
+    btn.style.color = '#fff';
+    btn.disabled = true;
+    updateScore(reward);
+    alert(`تبریک! شما ${reward} امتیاز گرفتید.`);
+  }
+
+  // --- SPIN WHEEL MECHANIC ---
+  let isSpinning = false;
+  spinBtn.addEventListener('click', () => {
+    if (isSpinning) return;
+    
+    isSpinning = true;
+    const randomDegree = Math.floor(Math.random() * 360) + 3600; // At least 10 full turns
+    wheel.style.transform = `rotate(${randomDegree}deg)`;
+
+    setTimeout(() => {
+      isSpinning = false;
+      // Calculate reward based on rotation (simplified logic)
+      const rewards = [100, 500, 200, 1000, 50, 300];
+      const win = rewards[Math.floor(Math.random() * rewards.length)];
+      updateScore(win);
+      alert(`🎉 شانسی بود! شما ${win} امتیاز برنده شدید!`);
+      wheel.style.transition = 'none';
+      wheel.style.transform = `rotate(${randomDegree % 360}deg)`;
+      setTimeout(() => wheel.style.transition = 'transform 4s cubic-bezier(0.15, 0, 0.15, 1)', 50);
+    }, 4000);
+  });
+
+</script>
+</body>
+</html>
